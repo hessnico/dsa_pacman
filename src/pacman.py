@@ -1,5 +1,5 @@
-from mapa import Mapa
-from logger import log
+from src.mapa import Mapa
+from src.logger import log
 
 
 class Pacman:

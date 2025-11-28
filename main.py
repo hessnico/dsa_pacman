@@ -1,7 +1,7 @@
 from typing import Tuple
-from pacman import Pacman
-from mapa import Mapa
-from logger import log
+from src.pacman import Pacman
+from src.mapa import Mapa
+from src.logger import log
 import argparse
 
 MOVIMENTOS = {
@@ -47,7 +47,7 @@ def jogo(m: Mapa, p: Pacman) -> None:
 def inicializa() -> Tuple[Mapa, Pacman]:
     m = Mapa()
     p = Pacman(11, 9)
-    arquivo = "fase1.txt"
+    arquivo = "./mapas/fase1.txt"
     m.carregar_arquivo(arquivo)
 
     return m, p
