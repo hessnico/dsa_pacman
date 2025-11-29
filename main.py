@@ -1,15 +1,17 @@
 from typing import Tuple
+from src.game import Game
 from src.pacman import Pacman
 from src.mapa import Mapa
 from src.logger import log
 import argparse
+from dataclasses import dataclass
 
-MOVIMENTOS = {
-    "w": (-1, 0),
-    "s": (1, 0),
-    "a": (0, -1),
-    "d": (0, 1),
-}
+
+@dataclass
+class InfoGame:
+    mapa: Mapa
+    pacman: Pacman
+    game: Game
 
 
 # colocar debug para facilitar nossa vida
@@ -23,34 +25,18 @@ def main():
     args = parse_args()
     log.set_debug(args.debug)
 
-    m, p = inicializa()
-    jogo(m, p)
+    j = inicializa()
+    j.game.run()
 
 
-def jogo(m: Mapa, p: Pacman) -> None:
-    while True:
-        m.imprimir(p)
-
-        cmd = input("Movimento (WASD, Q para sair): ").lower()
-
-        if cmd == "q":
-            log.Info("Saindo")
-            break
-
-        if cmd in MOVIMENTOS:
-            dx, dy = MOVIMENTOS[cmd]
-            p.mover(m, dx, dy)
-        else:
-            log.Warn(f"Comando inválido: {cmd}")
-
-
-def inicializa() -> Tuple[Mapa, Pacman]:
+def inicializa() -> InfoGame:
     m = Mapa()
     p = Pacman(11, 9)
+    g = Game(m, p)
     arquivo = "./mapas/fase1.txt"
     m.carregar_arquivo(arquivo)
 
-    return m, p
+    return InfoGame(m, p, g)
 
 
 if __name__ == "__main__":
