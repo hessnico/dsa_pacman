@@ -74,13 +74,31 @@ class Mapa:
 
                 match celula:
                     case "#":
-                        pygame.draw.rect(screen, cst.BLUE, (x, y, cst.TILE, cst.TILE))
+                        pygame.draw.rect(
+                            screen, cst.DARKER_BLUE, (x, y, cst.TILE, cst.TILE)
+                        )
 
                     case ".":
                         cx = x + cst.TILE // 2
                         cy = y + cst.TILE // 2
-                        pygame.draw.circle(screen, cst.YELLOW, (cx, cy), cst.DOT_RADIUS)
+
+                        cor = (
+                            cst.PURPLE
+                            if pacman.tempo_invencibilidade > 0
+                            else cst.YELLOW
+                        )
+                        pygame.draw.circle(screen, cor, (cx, cy), cst.DOT_RADIUS)
+
+                    case "0":
+                        cx = x + cst.TILE // 2
+                        cy = y + cst.TILE // 2
+                        pygame.draw.circle(
+                            screen, cst.PUMPKIN_ORANGE, (cx, cy), cst.POWERUP_RADIUS
+                        )
 
         pcx = pacman.y * cst.TILE + cst.TILE // 2
         pcy = pacman.x * cst.TILE + cst.TILE // 2
-        pygame.draw.circle(screen, cst.YELLOW, (pcx, pcy), cst.PACMAN_RADIUS)
+        if pacman.tempo_invencibilidade > 0:
+            pygame.draw.circle(screen, cst.WHITE, (pcx, pcy), cst.PACMAN_RADIUS)
+        else:
+            pygame.draw.circle(screen, cst.YELLOW, (pcx, pcy), cst.PACMAN_RADIUS)
