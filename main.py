@@ -30,11 +30,10 @@ def main():
 
 
 def inicializa() -> InfoGame:
-    m = Mapa()
+    arquivo = "./mapas/fase1.txt"
+    m = Mapa(arquivo)
     p = Pacman(11, 9)
     g = Game(m, p)
-    arquivo = "./mapas/fase1.txt"
-    m.carregar_arquivo(arquivo)
 
     return InfoGame(m, p, g)
 

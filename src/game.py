@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import pygame
 
 from src.logger import log
@@ -14,24 +12,34 @@ class Game:
 
         pygame.init()
         self.screen = pygame.display.set_mode((800, 600))
+        self.screen.fill("black")
         self.clock = pygame.time.Clock()
         self.running = True
 
     def run(self):
         while self.running:
             dt = self.clock.tick(5) / 1000
-            self.handle_events()
-            self.update()
-            self.render()
+            self._polling_eventos()
+            self._movimentar()
+            self._renderizar_mapa()
+            self.acabou()
 
         pygame.quit()
 
-    def handle_events(self):
+    def acabou(self) -> bool:
+        if self.pacman.pontuacao >= self.mapa.max_pontos:
+            log.Info(f"vitória. pontuação final: {self.pacman.pontuacao}")
+            self.running = False
+            return True
+
+        return False
+
+    def _polling_eventos(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
 
-    def update(self):
+    def _movimentar(self):
         keys = pygame.key.get_pressed()
         dx = dy = 0
         if keys[pygame.K_w]:
@@ -42,9 +50,11 @@ class Game:
             dy = -1
         elif keys[pygame.K_d]:
             dy = 1
-        if dx != 0 or dy != 0:
-            self.pacman.mover(self.mapa, dx, dy)
+        else:
+            return
 
-    def render(self):
+        self.pacman.mover(self.mapa, dx, dy)
+
+    def _renderizar_mapa(self):
         self.mapa.renderizar(self.pacman, self.screen)
         pygame.display.flip()

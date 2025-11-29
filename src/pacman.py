@@ -4,8 +4,16 @@ from src.logger import log
 
 class Pacman:
     def __init__(self, linha: int, coluna: int) -> None:
-        self.x = linha
-        self.y = coluna
+        self.x: int = linha
+        self.y: int = coluna
+        self.vidas: int = 3
+        self.pontuacao: int = 0
+
+    def remove_vida(self) -> None:
+        self.vidas -= 1
+
+    def pontua(self, pontos: int) -> None:
+        self.pontuacao += pontos
 
     def mover(self, mapa: Mapa, dx: int, dy: int):
         novo_x = self.x + dx
@@ -22,6 +30,7 @@ class Pacman:
         self.x = novo_x
 
     def pegar_item(self, mapa: Mapa):
-        if mapa.eh_ponto(self.x, self.y):
+        if mapa.eh_ponto(self.x, self.y) or mapa.eh_powerup(self.x, self.y):
             if mapa.remover_ponto(self.x, self.y):
-                log.Info("ganhei pontos")
+                self.pontua(10)
+                log.Info(f"Pontuação: {self.pontuacao}")
