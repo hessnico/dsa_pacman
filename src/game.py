@@ -1,15 +1,22 @@
 import pygame
 
+from typing import List
 from src import constants
+from src.ghost import Fantasma
 from src.logger import log
 from src.mapa import Mapa
 from src.pacman import Pacman
 
+import src.constants as cst
+
 
 class Game:
-    def __init__(self, m: Mapa, p: Pacman):
-        self.mapa = m
-        self.pacman = p
+    def __init__(self, m: Mapa, p: Pacman, f: List[Fantasma]):
+        self.mapa: Mapa = m
+        self.pacman: Pacman = p
+        self.fantasmas: List[Fantasma] = f
+        self.vidas: int = 3
+        self.pontuacao: int = 0
 
         pygame.init()
         self.font = pygame.font.SysFont("Arial", 24, bold=True)
@@ -17,6 +24,9 @@ class Game:
         self.screen.fill("black")
         self.clock = pygame.time.Clock()
         self.running = True
+
+        self.imagem_pacman = pygame.image.load("./imgs/pacman.gif")
+        self.imagem_fantasma = pygame.image.load("./imgs/ghost.gif")
 
     def run(self):
         while self.running:
@@ -33,6 +43,9 @@ class Game:
             log.Info(f"vitória. pontuação final: {self.pacman.pontuacao}")
             self.running = False
             return True
+
+        if self.vidas <= 0:
+            log.Info(f"Derrota. Pontuação final: {self.pacman.pontuacao}")
 
         return False
 
@@ -54,13 +67,34 @@ class Game:
             dy = 1
 
         self.pacman.atualizar_invencibilidade(dt)
+        [f.mover(self.mapa) for f in self.fantasmas]
         if dx != 0 or dy != 0:
             self.pacman.mover(self.mapa, dx, dy)
 
     def _renderizar_mapa(self):
-        self.mapa.renderizar(self.pacman, self.screen)
+        self._renderizar(self.pacman, self.fantasmas, self.screen)
         self._informa_jogador()
         pygame.display.flip()
+
+    def _renderizar(self, p: Pacman, fs: List[Fantasma], screen):
+        screen.fill("black")
+
+        for row, linha in enumerate(self.mapa.grid):
+            for col, celula in enumerate(linha):
+                x = col * cst.TILE
+                y = row * cst.TILE
+
+                match celula:
+                    case "#":
+                        self.renderiza_parede(x, y, screen)
+                    case ".":
+                        self.renderiza_pontinho(x, y, p, screen)
+                    case "0":
+                        self.renderiza_powerup(x, y, screen)
+                    case "<":
+                        self.renderiza_pacman(p, screen)
+                    case "F":
+                        [self.renderiza_fantasma(f, screen) for f in fs]
 
     def _informa_jogador(self):
         altura_grid = len(self.mapa.grid) * constants.TILE
@@ -69,9 +103,7 @@ class Game:
         pont_text = self.font.render(
             f"Pontuação: {self.pacman.pontuacao}", True, constants.WHITE
         )
-        vidas_text = self.font.render(
-            f"Vidas: {self.pacman.vidas}", True, constants.WHITE
-        )
+        vidas_text = self.font.render(f"Vidas: {self.vidas}", True, constants.WHITE)
         invencibilidade_text = self.font.render(
             f"Invencibilidade: {round(self.pacman.tempo_invencibilidade, 3)}",
             True,
@@ -81,3 +113,35 @@ class Game:
         self.screen.blit(vidas_text, (200, y_info))
         if self.pacman.tempo_invencibilidade > 0:
             self.screen.blit(invencibilidade_text, (400, y_info))
+
+    def renderiza_fantasma(self, f: Fantasma, screen):
+        x = f.y * cst.TILE
+        y = f.x * cst.TILE
+        self.renderiza_imagem_centralizada(x, y, self.imagem_fantasma, screen)
+
+    def renderiza_pontinho(self, x, y, p, screen):
+        cx = x + cst.TILE // 2
+        cy = y + cst.TILE // 2
+
+        cor = cst.PURPLE if p.tempo_invencibilidade > 0 else cst.YELLOW
+        pygame.draw.circle(screen, cor, (cx, cy), cst.DOT_RADIUS)
+
+    def renderiza_parede(self, x, y, screen):
+        pygame.draw.rect(screen, cst.DARKER_BLUE, (x, y, cst.TILE, cst.TILE))
+
+    def renderiza_powerup(self, x, y, screen):
+        cx = x + cst.TILE // 2
+        cy = y + cst.TILE // 2
+        pygame.draw.circle(screen, cst.PUMPKIN_ORANGE, (cx, cy), cst.POWERUP_RADIUS)
+
+    def renderiza_pacman(self, p: Pacman, screen) -> None:
+        x = p.y * cst.TILE
+        y = p.x * cst.TILE
+        self.renderiza_imagem_centralizada(x, y, self.imagem_pacman, screen)
+
+    def renderiza_imagem_centralizada(self, x, y, img, screen) -> None:
+        w = self.imagem_pacman.get_width()
+        h = self.imagem_pacman.get_height()
+        offset_x = (cst.TILE - w) // 2
+        offset_y = (cst.TILE - h) // 2
+        screen.blit(img, (x + offset_x, y + offset_y))

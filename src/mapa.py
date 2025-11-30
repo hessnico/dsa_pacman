@@ -1,12 +1,8 @@
 from __future__ import annotations
 
 import pygame
-from typing import TYPE_CHECKING
 import src.constants as cst
 from src.logger import log
-
-if TYPE_CHECKING:
-    from pacman import Pacman
 
 
 class Mapa:
@@ -42,7 +38,7 @@ class Mapa:
         pontos = 0
         for linha in self.grid:
             for celula in linha:
-                if celula in [".", "0"]:
+                if celula in ["."]:
                     pontos += cst.PONTUACAO_PADRAO
 
         log.Info(f"Mapa inicializado com um total de {pontos} pontos")
@@ -63,42 +59,3 @@ class Mapa:
 
     def eh_parede(self, x, y) -> bool:
         return self.grid[x][y] == "#"
-
-    def renderizar(self, pacman: Pacman, screen):
-        screen.fill("black")
-
-        for row, linha in enumerate(self.grid):
-            for col, celula in enumerate(linha):
-                x = col * cst.TILE
-                y = row * cst.TILE
-
-                match celula:
-                    case "#":
-                        pygame.draw.rect(
-                            screen, cst.DARKER_BLUE, (x, y, cst.TILE, cst.TILE)
-                        )
-
-                    case ".":
-                        cx = x + cst.TILE // 2
-                        cy = y + cst.TILE // 2
-
-                        cor = (
-                            cst.PURPLE
-                            if pacman.tempo_invencibilidade > 0
-                            else cst.YELLOW
-                        )
-                        pygame.draw.circle(screen, cor, (cx, cy), cst.DOT_RADIUS)
-
-                    case "0":
-                        cx = x + cst.TILE // 2
-                        cy = y + cst.TILE // 2
-                        pygame.draw.circle(
-                            screen, cst.PUMPKIN_ORANGE, (cx, cy), cst.POWERUP_RADIUS
-                        )
-
-        pcx = pacman.y * cst.TILE + cst.TILE // 2
-        pcy = pacman.x * cst.TILE + cst.TILE // 2
-        if pacman.tempo_invencibilidade > 0:
-            pygame.draw.circle(screen, cst.WHITE, (pcx, pcy), cst.PACMAN_RADIUS)
-        else:
-            pygame.draw.circle(screen, cst.YELLOW, (pcx, pcy), cst.PACMAN_RADIUS)

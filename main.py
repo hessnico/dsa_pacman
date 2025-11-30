@@ -1,5 +1,6 @@
-from typing import Tuple
+from typing import Tuple, List
 from src.game import Game
+from src.ghost import Fantasma
 from src.pacman import Pacman
 from src.mapa import Mapa
 from src.logger import log
@@ -11,6 +12,7 @@ from dataclasses import dataclass
 class InfoGame:
     mapa: Mapa
     pacman: Pacman
+    ghosts: List[Fantasma]
     game: Game
 
 
@@ -33,9 +35,10 @@ def inicializa() -> InfoGame:
     arquivo = "./mapas/fase1.txt"
     m = Mapa(arquivo)
     p = Pacman(11, 9)
-    g = Game(m, p)
+    l_f = [Fantasma(7, 8), Fantasma(7, 9), Fantasma(7, 10), Fantasma(7, 11)]
+    g = Game(m, p, l_f)
 
-    return InfoGame(m, p, g)
+    return InfoGame(m, p, l_f, g)
 
 
 if __name__ == "__main__":

@@ -1,17 +1,13 @@
+from src.entity import Entidade
 from src.mapa import Mapa
 from src.logger import log
 
 
-class Pacman:
+class Pacman(Entidade):
     def __init__(self, linha: int, coluna: int) -> None:
-        self.x: int = linha
-        self.y: int = coluna
-        self.vidas: int = 3
+        super().__init__(linha, coluna)
         self.pontuacao: int = 0
         self.tempo_invencibilidade: float = 0
-
-    def remove_vida(self) -> None:
-        self.vidas -= 1
 
     def pontua(self, pontos: int) -> None:
         self.pontuacao += pontos
