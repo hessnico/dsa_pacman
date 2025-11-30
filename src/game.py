@@ -1,7 +1,8 @@
 import pygame
-
+import math
 from typing import List
 from src import constants
+from src import pacman
 from src.ghost import Fantasma
 from src.logger import log
 from src.mapa import Mapa
@@ -31,6 +32,7 @@ class Game:
             dt = self.clock.tick(5) / 1000
             self._polling_eventos()
             self._atualizar(dt)
+            self._checar_colisoes()
             self._movimentar()
             self._checar_colisoes()
             self._renderizar_mapa()
@@ -42,9 +44,13 @@ class Game:
         self.pacman.atualizar_invencibilidade(dt)
         [f.atualizar_tempos(dt) for f in self.fantasmas]
 
+    def colidiu(self, f: Fantasma):
+        if self.pacman.x == f.x and self.pacman.y == f.y:
+            return True
+
     def _checar_colisoes(self):
         for f in self.fantasmas:
-            if f.x == self.pacman.x and f.y == self.pacman.y:
+            if self.colidiu(f):
                 self._resolver_colisao(f)
 
     def _resolver_colisao(self, f: Fantasma):
