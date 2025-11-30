@@ -15,8 +15,6 @@ class Game:
         self.mapa: Mapa = m
         self.pacman: Pacman = p
         self.fantasmas: List[Fantasma] = f
-        self.vidas: int = 3
-        self.pontuacao: int = 0
 
         pygame.init()
         self.font = pygame.font.SysFont("Arial", 24, bold=True)
@@ -32,11 +30,43 @@ class Game:
         while self.running:
             dt = self.clock.tick(5) / 1000
             self._polling_eventos()
-            self._movimentar(dt)
+            self._atualizar(dt)
+            self._movimentar()
+            self._checar_colisoes()
             self._renderizar_mapa()
             self._acabou()
 
         pygame.quit()
+
+    def _atualizar(self, dt):
+        self.pacman.atualizar_invencibilidade(dt)
+        [f.atualizar_tempos(dt) for f in self.fantasmas]
+
+    def _checar_colisoes(self):
+        for f in self.fantasmas:
+            if f.x == self.pacman.x and f.y == self.pacman.y:
+                self._resolver_colisao(f)
+
+    def _resolver_colisao(self, f: Fantasma):
+        if self.pacman.tempo_invencibilidade > 0:
+            self.pacman.pontuacao += 100
+            f.resetar_posicao()
+            return
+
+        self.pacman.vidas -= 1
+        log.Info("Pacman perdeu uma vida!")
+
+        self.pacman.resetar_posicao()
+        for f in self.fantasmas:
+            f.resetar_posicao()
+
+        if self.pacman.vidas <= 0:
+            # TODO: voltar ao menu principal
+            log.Info("Game Over!")
+            self.running = False
+            return
+
+        pygame.time.delay(1500)
 
     def _acabou(self) -> bool:
         if self.pacman.pontuacao >= self.mapa.max_pontos:
@@ -44,7 +74,7 @@ class Game:
             self.running = False
             return True
 
-        if self.vidas <= 0:
+        if self.pacman.vidas <= 0:
             log.Info(f"Derrota. Pontuação final: {self.pacman.pontuacao}")
 
         return False
@@ -54,7 +84,7 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
 
-    def _movimentar(self, dt):
+    def _movimentar(self):
         keys = pygame.key.get_pressed()
         dx = dy = 0
         if keys[pygame.K_w]:
@@ -66,7 +96,6 @@ class Game:
         elif keys[pygame.K_d]:
             dy = 1
 
-        self.pacman.atualizar_invencibilidade(dt)
         [f.mover(self.mapa) for f in self.fantasmas]
         if dx != 0 or dy != 0:
             self.pacman.mover(self.mapa, dx, dy)
@@ -103,7 +132,9 @@ class Game:
         pont_text = self.font.render(
             f"Pontuação: {self.pacman.pontuacao}", True, constants.WHITE
         )
-        vidas_text = self.font.render(f"Vidas: {self.vidas}", True, constants.WHITE)
+        vidas_text = self.font.render(
+            f"Vidas: {self.pacman.vidas}", True, constants.WHITE
+        )
         invencibilidade_text = self.font.render(
             f"Invencibilidade: {round(self.pacman.tempo_invencibilidade, 3)}",
             True,

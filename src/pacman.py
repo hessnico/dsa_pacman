@@ -8,6 +8,7 @@ class Pacman(Entidade):
         super().__init__(linha, coluna)
         self.pontuacao: int = 0
         self.tempo_invencibilidade: float = 0
+        self.vidas: int = 3
 
     def pontua(self, pontos: int) -> None:
         self.pontuacao += pontos
@@ -16,17 +17,15 @@ class Pacman(Entidade):
         self.tempo_invencibilidade = 10
 
     def atualizar_invencibilidade(self, dt):
-        if self.tempo_invencibilidade > 0:
-            log.Debug(
-                f"Antes de diminuir Invencibilidade: {self.tempo_invencibilidade}"
-            )
-            self.tempo_invencibilidade -= dt
-            log.Debug(
-                f"Depois de diminuir Invencibilidade: {self.tempo_invencibilidade}"
-            )
-            if self.tempo_invencibilidade <= 0:
-                self.tempo_invencibilidade = 0
-                log.Info("Invencibilidade terminou")
+        if self.tempo_invencibilidade <= 0:
+            return
+
+        log.Debug(f"Antes de diminuir Invencibilidade: {self.tempo_invencibilidade}")
+        self.tempo_invencibilidade -= dt
+        log.Debug(f"Depois de diminuir Invencibilidade: {self.tempo_invencibilidade}")
+        if self.tempo_invencibilidade <= 0:
+            self.tempo_invencibilidade = 0
+            log.Info("Invencibilidade terminou")
 
     def mover(self, mapa: Mapa, dx: int, dy: int):
         novo_x = self.x + dx

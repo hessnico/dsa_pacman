@@ -9,10 +9,13 @@ from src.pacman import Pacman
 class Fantasma(Entidade):
     def __init__(self, linha: int, coluna: int) -> None:
         super().__init__(linha, coluna)
-        self.id = ""
+        self.tempo_para_sair_base: float = 1
         self.vivo = True
 
     def mover(self, m: Mapa):
+        if self.tempo_para_sair_base > 0:
+            return
+
         direcoes = [(1, 0), (-1, 0), (0, 1), (0, -1)]
         direcoes_validas = []
         for d in direcoes:
@@ -34,5 +37,16 @@ class Fantasma(Entidade):
         self.y = novo_y
         self.x = novo_x
 
-    def colidiu_com_pacman(self, p: Pacman) -> bool:
-        return self.x == p.x and self.y == p.y
+    def resetar_posicao(self):
+        self.x = self.spawn_x
+        self.y = self.spawn_y
+        self.tempo_para_sair_base = 3
+
+    def atualizar_tempos(self, dt):
+        if self.tempo_para_sair_base <= 0:
+            return
+
+        self.tempo_para_sair_base -= dt
+        if self.tempo_para_sair_base <= 0:
+            self.tempo_para_sair_base = 0
+            log.Info("Invencibilidade terminou")
