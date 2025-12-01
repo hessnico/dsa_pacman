@@ -113,8 +113,8 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
 
-    def _movimentar(self, mapa: Mapa):
-        dx_input = dy_input = 0
+    def _movimentar(self, mapa: Mapa): ##
+        dx_input = dy_input = 0 
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]: dx_input = -1

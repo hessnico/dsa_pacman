@@ -30,11 +30,11 @@ class Pacman(Entidade):
             self.tempo_invencibilidade = 0
             log.Info("Invencibilidade terminou")
 
-    def mudar_direcao(self, dx: int, dy: int, mapa: Mapa): # movimento continuo
+    def mudar_direcao(self, dx: int, dy: int, mapa: Mapa): ## movimento continuo
         dx_futuro = self.x + dx
         dy_futuro = self.y + dy
         
-        if mapa.eh_parede(dx_futuro, dy_futuro): # se for parede, continua com 
+        if mapa.eh_parede(dx_futuro, dy_futuro): ## se for parede, continua com 
             self.dx_atual = self.dx_atual    
             self.dy_atual = self.dy_atual
         elif dx != 0 or dy != 0:
