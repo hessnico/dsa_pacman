@@ -1,0 +1,10 @@
+[
+    {
+        "usuario": "teste",
+        "pontos": 130
+    },
+    {
+        "usuario": "teste",
+        "pontos": 20
+    }
+]

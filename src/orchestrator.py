@@ -1,11 +1,26 @@
 from dataclasses import dataclass
 from typing import List
+from enum import Enum
 
+from src import constants
 from src.game import Game
 from src.ghost import Fantasma
 from src.logger import log
 from src.mapa import Mapa
 from src.pacman import Pacman
+from src.ranking import RankingMaxHeap, StatusOpRanking
+
+
+class StatusJogo(Enum):
+    SUCESSO = "sucesso"
+    ACABOU_VIDAS = "acabou_vidas"
+    ERRO = "erro"
+
+
+@dataclass
+class InfoOrc:
+    status: StatusJogo
+    pontos: int
 
 
 @dataclass
@@ -19,33 +34,53 @@ class Orchestrator:
     def __init__(self) -> None:
         pass
 
-    def inicializa(self) -> Exception | None:
-        try:
-            self.orquestrar_jogo()
-            self.orquestrar_ranking()
-            return None
-        except Exception as e:
-            return e
+    def inicializa(self) -> bool:
+        jogo_res = self.orquestrar_jogo()
+        if jogo_res.status == StatusJogo.ERRO:
+            return False
 
-    def orquestrar_jogo(self):
+        log.Info(f"Jogo encerrado com status: {jogo_res.status.value}")
+
+        rank_res = self.orquestrar_ranking(jogo_res)
+        if rank_res != StatusOpRanking.SUCESSO:
+            log.Error(f"Erro ao salvar ranking: {rank_res.value}")
+            return False
+
+        return True
+
+    def orquestrar_jogo(self) -> InfoOrc:
         log.Info("Inicializando o jogo")
-        fase_1 = self.inicializa_fase_1()
-        fase_2 = self.inicializa_fase_2()
-        fase_3 = self.inicializa_fase_3()
 
-        fases = [fase_1, fase_2, fase_3]
+        fases = [
+            self.inicializa_fase_1(),
+            # self.inicializa_fase_2(),
+            # self.inicializa_fase_3(),
+        ]
+
+        pontos: int = 0
         try:
             for f in fases:
                 g = Game(f.mapa, f.pacman, f.ghosts)
                 g.run()
+                pontos = pontos + g.pacman.pontuacao
                 if self.devo_parar_jogo(g):
                     log.Info("Jogo finalizado com sucesso. Usuário perdeu")
+                    return InfoOrc(StatusJogo.ACABOU_VIDAS, pontos)
+
+            return InfoOrc(StatusJogo.SUCESSO, pontos)
 
         except Exception as e:
             log.Error(f"Erro: {e}")
 
-    def orquestrar_ranking(self):
-        pass
+            # se ocorrer um erro, invalida pontuação
+            return InfoOrc(StatusJogo.ERRO, 0)
+
+    def orquestrar_ranking(self, infoOrc: InfoOrc) -> StatusOpRanking:
+        log.Info("Salvando logs")
+        user = "teste"
+        r = RankingMaxHeap(infoOrc.pontos, user)
+
+        return r.salva_ranking()
 
     def devo_parar_jogo(self, g: Game) -> bool:
         if g.pacman.vidas <= 0:
@@ -54,24 +89,21 @@ class Orchestrator:
             return False
 
     def inicializa_fase_1(self) -> InfoGame:
-        arquivo = "./mapas/fase1.txt"
-        m = Mapa(arquivo)
+        m = Mapa(constants.PATH_FASE_1)
         p = Pacman(11, 9)
         l_f = [Fantasma(7, 8), Fantasma(7, 9), Fantasma(7, 10), Fantasma(7, 11)]
 
         return InfoGame(m, p, l_f)
 
     def inicializa_fase_2(self) -> InfoGame:
-        arquivo = "./mapas/fase2.txt"
-        m = Mapa(arquivo)
+        m = Mapa(constants.PATH_FASE_2)
         p = Pacman(16, 8)
         l_f = [Fantasma(8, 8), Fantasma(8, 9), Fantasma(8, 10), Fantasma(8, 11)]
 
         return InfoGame(m, p, l_f)
 
     def inicializa_fase_3(self) -> InfoGame:
-        arquivo = "./mapas/fase3.txt"
-        m = Mapa(arquivo)
+        m = Mapa(constants.PATH_FASE_3)
         p = Pacman(25, 14)
         l_f = [Fantasma(13, 11), Fantasma(13, 13), Fantasma(13, 14), Fantasma(13, 16)]
 

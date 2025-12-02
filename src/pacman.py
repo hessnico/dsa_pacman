@@ -8,7 +8,7 @@ class Pacman(Entidade):
         super().__init__(linha, coluna)
         self.pontuacao: int = 0
         self.tempo_invencibilidade: float = 0
-        self.vidas: int = 3
+        self.vidas: int = 1
 
         self.dx_atual = 0
         self.dy_atual = 0

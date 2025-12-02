@@ -24,3 +24,8 @@ POWERUP_RADIUS = TILE // 4
 PACMAN_RADIUS = TILE // 2 - 2
 
 PONTUACAO_PADRAO: int = 10
+
+PATH_RANKING = "./results/resultados.txt"
+PATH_FASE_1 = "./mapas/fase1.txt"
+PATH_FASE_2 = "./mapas/fase2.txt"
+PATH_FASE_3 = "./mapas/fase3.txt"
