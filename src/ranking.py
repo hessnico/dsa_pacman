@@ -5,8 +5,11 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List
 
+import pygame
+
 from src import constants
 from src.logger import log
+from src.render import RecursosRenderizacao
 
 
 @dataclass(order=True)
@@ -22,9 +25,12 @@ class StatusOpRanking(Enum):
 
 
 class RankingMaxHeap:
-    def __init__(self, pontos: int, usuario: str):
+    def __init__(
+        self, pontos: int, usuario: str, recursosRenderizar: RecursosRenderizacao
+    ):
         self.new_entry: Ranking = Ranking(pontos=pontos, usuario=usuario)
         self.heap: List[Ranking] = []
+        self.recursosRenderizar = recursosRenderizar
 
     def salva_ranking(self):
         status = self.carregar()
@@ -33,7 +39,11 @@ class RankingMaxHeap:
             return status
 
         self.transformar()
+        self.exibir()
         return self.salvar()
+
+    def exibir(self) -> None:
+        pass
 
     def transformar(self) -> None:
         self.heap.append(self.new_entry)

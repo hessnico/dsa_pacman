@@ -5,6 +5,14 @@
     },
     {
         "usuario": "teste",
+        "pontos": 290
+    },
+    {
+        "usuario": "teste",
+        "pontos": 130
+    },
+    {
+        "usuario": "teste",
         "pontos": 200
     },
     {
@@ -13,14 +21,38 @@
     },
     {
         "usuario": "teste",
-        "pontos": 20
-    },
-    {
-        "usuario": "teste",
-        "pontos": 130
+        "pontos": 70
     },
     {
         "usuario": "teste",
         "pontos": 70
+    },
+    {
+        "usuario": "teste",
+        "pontos": 20
+    },
+    {
+        "usuario": "teste",
+        "pontos": 60
+    },
+    {
+        "usuario": "debug-test-123",
+        "pontos": 70
+    },
+    {
+        "usuario": "daw",
+        "pontos": 30
+    },
+    {
+        "usuario": "dwdwd",
+        "pontos": 30
+    },
+    {
+        "usuario": "wdwawd",
+        "pontos": 30
+    },
+    {
+        "usuario": "dwiuidhwu",
+        "pontos": 0
     }
 ]

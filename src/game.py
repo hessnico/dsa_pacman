@@ -3,6 +3,7 @@ from typing import List
 import pygame
 
 import src.constants as cst
+from src.render import RecursosRenderizacao
 from src import constants
 from src.ghost import Fantasma
 from src.logger import log
@@ -11,74 +12,37 @@ from src.pacman import Pacman
 
 
 class Game:
-    def __init__(self, m: Mapa, p: Pacman, f: List[Fantasma], screen=None):
+    def __init__(
+        self, m: Mapa, p: Pacman, f: List[Fantasma], recursos: RecursosRenderizacao
+    ):
         self.state = "MENU"
 
-        self.mapa: Mapa = m
-        self.pacman: Pacman = p
-        self.fantasmas: List[Fantasma] = f
-        pygame.init()
+        self.mapa = m
+        self.pacman = p
+        self.fantasmas = f
 
-        self.font = pygame.font.SysFont("Arial", 24, bold=True)
+        self.screen = recursos.screen
+        self.font = recursos.font
+        self.fonte_titulo = recursos.fonte_titulo
+        self.fonte_instrucao = recursos.fonte_instrucao
+        self.clock = recursos.clock
+        self.imagem_pacman = recursos.imagem_pacman
+        self.imagem_fantasma = recursos.imagem_fantasma
 
-        self.fonte_titulo = pygame.font.SysFont("Arial", 60, bold=True)
-        self.fonte_instrucao = pygame.font.SysFont("Arial", 25)
-
-        if screen:
-            self.screen = screen
-        else:
-            self.screen = pygame.display.set_mode((1280, 1280))
-
-        self.clock = pygame.time.Clock()
         self.running = True
-
-        self.imagem_pacman = pygame.image.load("./imgs/pacman.gif")
-        self.imagem_fantasma = pygame.image.load("./imgs/ghost.gif")
 
     def run(self):
         while self.running:
-            if self.state == "MENU":
-                self.menu_principal()
-            else:
-                dt = self.clock.tick(5) / 1000
-                self.polling_eventos()
-                self.atualizar(dt)
-                self.checar_colisoes()
-                self.movimentar()
-                self.checar_colisoes()
-                self.renderizar_mapa()
-                self.acabou()
+            dt = self.clock.tick(5) / 1000
+            self.polling_eventos()
+            self.atualizar(dt)
+            self.checar_colisoes()
+            self.movimentar()
+            self.checar_colisoes()
+            self.renderizar_mapa()
+            self.acabou()
 
         pygame.quit()
-
-    def menu_principal(self):
-        menu = True
-
-        while menu:
-            self.screen.fill("black")
-            largura, altura = self.screen.get_size()
-
-            titulo_texto = self.fonte_titulo.render("PAC-MAN", True, constants.YELLOW)
-            rect_titulo = titulo_texto.get_rect(center=(largura / 2, altura / 2 - 100))
-            self.screen.blit(titulo_texto, rect_titulo)
-
-            instrucao_texto = self.fonte_instrucao.render(
-                "Pressione ENTER para Começar", True, constants.WHITE
-            )
-            rect_instrucao = instrucao_texto.get_rect(
-                center=(largura / 2, altura / 2 + 50)
-            )
-            self.screen.blit(instrucao_texto, rect_instrucao)
-
-            pygame.display.flip()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        self.entrar_no_jogo()
-                        menu = False
 
     def entrar_no_jogo(self):
         self.clock.tick()
