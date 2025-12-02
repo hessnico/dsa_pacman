@@ -1,21 +1,22 @@
-import pygame
-import math
 from typing import List
+
+import pygame
+
+import src.constants as cst
 from src import constants
-from src import pacman
 from src.ghost import Fantasma
 from src.logger import log
 from src.mapa import Mapa
 from src.pacman import Pacman
-import src.constants as cst
 
 
 class Game:
     def __init__(self, m: Mapa, p: Pacman, f: List[Fantasma], screen=None):
+        self.state = "MENU"
+
         self.mapa: Mapa = m
         self.pacman: Pacman = p
         self.fantasmas: List[Fantasma] = f
-
         pygame.init()
 
         self.font = pygame.font.SysFont("Arial", 24, bold=True)
@@ -36,18 +37,54 @@ class Game:
 
     def run(self):
         while self.running:
-            dt = self.clock.tick(5) / 1000
-            self._polling_eventos()
-            self._atualizar(dt)
-            self._checar_colisoes()
-            self._movimentar(self.mapa)
-            self._checar_colisoes()
-            self._renderizar_mapa()
-            self._acabou()
+            if self.state == "MENU":
+                self.menu_principal()
+            else:
+                dt = self.clock.tick(5) / 1000
+                self.polling_eventos()
+                self.atualizar(dt)
+                self.checar_colisoes()
+                self.movimentar()
+                self.checar_colisoes()
+                self.renderizar_mapa()
+                self.acabou()
 
         pygame.quit()
 
-    def _atualizar(self, dt):
+    def menu_principal(self):
+        menu = True
+
+        while menu:
+            self.screen.fill("black")
+            largura, altura = self.screen.get_size()
+
+            titulo_texto = self.fonte_titulo.render("PAC-MAN", True, constants.YELLOW)
+            rect_titulo = titulo_texto.get_rect(center=(largura / 2, altura / 2 - 100))
+            self.screen.blit(titulo_texto, rect_titulo)
+
+            instrucao_texto = self.fonte_instrucao.render(
+                "Pressione ENTER para Começar", True, constants.WHITE
+            )
+            rect_instrucao = instrucao_texto.get_rect(
+                center=(largura / 2, altura / 2 + 50)
+            )
+            self.screen.blit(instrucao_texto, rect_instrucao)
+
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        self.entrar_no_jogo()
+                        menu = False
+
+    def entrar_no_jogo(self):
+        self.clock.tick()
+        self.state = "JOGANDO"
+
+    def atualizar(self, dt):
         self.pacman.atualizar_invencibilidade(dt)
         [f.atualizar_tempos(dt) for f in self.fantasmas]
 
@@ -55,12 +92,12 @@ class Game:
         if self.pacman.x == f.x and self.pacman.y == f.y:
             return True
 
-    def _checar_colisoes(self):
+    def checar_colisoes(self):
         for f in self.fantasmas:
             if self.colidiu(f):
-                self._resolver_colisao(f)
+                self.resolver_colisao(f)
 
-    def _resolver_colisao(self, f: Fantasma):
+    def resolver_colisao(self, f: Fantasma):
         if self.pacman.tempo_invencibilidade > 0:
             f.resetar_posicao()
             return
@@ -74,7 +111,7 @@ class Game:
 
         pygame.time.delay(1500)
 
-    def _acabou(self) -> bool:
+    def acabou(self) -> bool:
         if self.pacman.pontuacao >= self.mapa.max_pontos:
             log.Info(f"vitória. pontuação final: {self.pacman.pontuacao}")
             self.mostrar_game_over(
@@ -109,12 +146,12 @@ class Game:
                     if event.key == pygame.K_RETURN:
                         esperando = False
 
-    def _polling_eventos(self):
+    def polling_eventos(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
 
-    def _movimentar(self, mapa: Mapa):
+    def movimentar(self):
         dx_input = dy_input = 0
 
         keys = pygame.key.get_pressed()
@@ -141,12 +178,12 @@ class Game:
 
         self.pacman.mover(self.mapa)
 
-    def _renderizar_mapa(self):
-        self._renderizar(self.pacman, self.fantasmas, self.screen)
-        self._informa_jogador()
+    def renderizar_mapa(self):
+        self.renderizar(self.pacman, self.fantasmas, self.screen)
+        self.informa_jogador()
         pygame.display.flip()
 
-    def _renderizar(self, p: Pacman, fs: List[Fantasma], screen):
+    def renderizar(self, p: Pacman, fs: List[Fantasma], screen):
         screen.fill("black")
 
         for row, linha in enumerate(self.mapa.grid):
@@ -166,7 +203,7 @@ class Game:
                     case "F":
                         [self.renderiza_fantasma(f, screen) for f in fs]
 
-    def _informa_jogador(self):
+    def informa_jogador(self):
         altura_grid = len(self.mapa.grid) * constants.TILE
         margem = 10
         y_info = altura_grid + margem
@@ -233,7 +270,6 @@ class Game:
         overlay.fill((0, 0, 0))
         tela.blit(overlay, (0, 0))
 
-        # Agora usa self.fonte_titulo que criamos no init
         texto_t = self.fonte_titulo.render(titulo, True, cor_titulo)
         texto_i = self.fonte_instrucao.render(
             "ENTER para Reiniciar ou ESC para Sair", True, constants.WHITE

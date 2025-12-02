@@ -1,6 +1,6 @@
 from src.entity import Entidade
-from src.mapa import Mapa
 from src.logger import log
+from src.mapa import Mapa
 
 
 class Pacman(Entidade):

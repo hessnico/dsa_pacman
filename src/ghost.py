@@ -1,6 +1,6 @@
 import random
 from collections import deque
-from typing import Tuple, List
+from typing import List, Tuple
 
 from src import constants
 from src.entity import Entidade
@@ -11,7 +11,7 @@ from src.mapa import Mapa
 class Fantasma(Entidade):
     def __init__(self, linha: int, coluna: int) -> None:
         super().__init__(linha, coluna)
-        self.tempo_para_sair_base: float = 1
+        self.tempo_para_sair_base: float = 2
         self.vivo = True
 
     def resetar_posicao(self):

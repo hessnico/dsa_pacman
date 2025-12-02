@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from typing import List
 from enum import Enum
+from typing import List
 
 from src import constants
 from src.game import Game
@@ -53,8 +53,8 @@ class Orchestrator:
 
         fases = [
             self.inicializa_fase_1(),
-            # self.inicializa_fase_2(),
-            # self.inicializa_fase_3(),
+            self.inicializa_fase_2(),
+            self.inicializa_fase_3(),
         ]
 
         pontos: int = 0

@@ -1,10 +1,26 @@
 [
     {
         "usuario": "teste",
+        "pontos": 310
+    },
+    {
+        "usuario": "teste",
+        "pontos": 200
+    },
+    {
+        "usuario": "teste",
         "pontos": 130
     },
     {
         "usuario": "teste",
         "pontos": 20
+    },
+    {
+        "usuario": "teste",
+        "pontos": 130
+    },
+    {
+        "usuario": "teste",
+        "pontos": 70
     }
 ]
