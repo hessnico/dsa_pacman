@@ -1,9 +1,11 @@
-from src.entity import Entidade
 import random
+from collections import deque
+from typing import Tuple, List
 
+from src import constants
+from src.entity import Entidade
 from src.logger import log
 from src.mapa import Mapa
-from src.pacman import Pacman
 
 
 class Fantasma(Entidade):
@@ -25,37 +27,32 @@ class Fantasma(Entidade):
         if self.tempo_para_sair_base <= 0:
             self.tempo_para_sair_base = 0
 
-    def mover(self, m: Mapa, destino: tuple[int, int]):
-        if self.tempo_para_sair_base > 0:
-            return
-
+    def mover_bfs(self, m: Mapa, destino: Tuple[int, int]) -> None:
         inicio = (int(self.x), int(self.y))
         alvo = (int(destino[0]), int(destino[1]))
 
         if inicio == alvo:
             return
 
-        if m.eh_parede(alvo[0], alvo[1]):
-            log.Info(
-                f"ERRO: O Pacman está dentro da parede em {alvo} ou coordenadas invertidas!"
-            )
+        caminho_ate_pacman: List | None = self.bfs(m, inicio, alvo)
+        if caminho_ate_pacman is not None and len(caminho_ate_pacman) > 0:
+            self.x = caminho_ate_pacman[-1][0]
+            self.y = caminho_ate_pacman[-1][1]
+        else:
+            log.Error("Não encontrou caminho. Algo está errado.")
+
+    def mover(self, m: Mapa, eh_invencivel: bool, destino: Tuple[int, int]):
+        if self.tempo_para_sair_base > 0:
             return
 
-        caminho_ate_pacman = self.bfs(m, inicio, alvo)
+        log.Debug(f"eh eh_invencivel: {eh_invencivel}")
 
-        if caminho_ate_pacman is not None and len(caminho_ate_pacman) > 0:
-            proximo_passo = caminho_ate_pacman[-1]
-
-            self.x = proximo_passo[0]
-            self.y = proximo_passo[1]
-
+        if eh_invencivel:
+            self.mover_aleatorio(m)
         else:
-            # self.mover_aleatorio(m)
-            log.Warn("Não encontrou caminho")
+            self.mover_bfs(m, destino)
 
-    def bfs(self, m: Mapa, inicio: tuple, destino: tuple[int, int]):
-        from collections import deque
-
+    def bfs(self, m: Mapa, inicio: Tuple, destino: Tuple[int, int]) -> List | None:
         fila = deque()
         fila.append(inicio)
 
@@ -73,16 +70,11 @@ class Fantasma(Entidade):
                 break
 
             x, y = atual
-            for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            for dx, dy in constants.MOVIMENTOS_LISTA:
                 novo_x, novo_y = x + dx, y + dy
                 vizinho = (novo_x, novo_y)
 
-                if (
-                    0 <= novo_x < m.rows
-                    and 0 <= novo_y < m.cols
-                    and not m.eh_parede(novo_x, novo_y)
-                    and vizinho not in visitados
-                ):
+                if self.caminho_valido(m, novo_x, novo_y, vizinho, visitados):
                     fila.append(vizinho)
                     visitados.add(vizinho)
                     veio_de[vizinho] = atual
@@ -99,8 +91,16 @@ class Fantasma(Entidade):
 
         return None
 
-    def mover_aleatorio(self, m: Mapa):
-        direcoes = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+    def caminho_valido(self, m: Mapa, novo_x, novo_y, vizinho, visitados):
+        return (
+            0 <= novo_x < m.rows
+            and 0 <= novo_y < m.cols
+            and not m.eh_parede(novo_x, novo_y)
+            and vizinho not in visitados
+        )
+
+    def mover_aleatorio(self, m: Mapa) -> None:
+        direcoes = constants.MOVIMENTOS_LISTA
         direcoes_validas = []
         for d in direcoes:
             novo_x = self.x + d[0]
@@ -114,7 +114,7 @@ class Fantasma(Entidade):
         novo_y = self.y + dy
 
         if m.eh_parede(novo_x, novo_y):
-            log.Warn("Jogada invalida.")
+            log.Debug("Jogada invalida.")
             return  # no-op
 
         log.Debug(f"DEBUG: Movendo Fantasma de {self.y, self.x} para {novo_y, novo_x}")

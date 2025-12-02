@@ -26,16 +26,13 @@ class Game:
         if screen:
             self.screen = screen
         else:
-            self.screen = pygame.display.set_mode((800, 800))
+            self.screen = pygame.display.set_mode((1280, 1280))
 
         self.clock = pygame.time.Clock()
         self.running = True
 
-        try:
-            self.imagem_pacman = pygame.image.load("./imgs/pacman.gif")
-            self.imagem_fantasma = pygame.image.load("./imgs/ghost.gif")
-        except:
-            log.Info("Imagens não encontradas, usando quadrados coloridos.")
+        self.imagem_pacman = pygame.image.load("./imgs/pacman.gif")
+        self.imagem_fantasma = pygame.image.load("./imgs/ghost.gif")
 
     def run(self):
         while self.running:
@@ -65,7 +62,6 @@ class Game:
 
     def _resolver_colisao(self, f: Fantasma):
         if self.pacman.tempo_invencibilidade > 0:
-            self.pacman.pontuacao += 100
             f.resetar_posicao()
             return
 
@@ -76,14 +72,6 @@ class Game:
         for f in self.fantasmas:
             f.resetar_posicao()
 
-        if self.pacman.vidas <= 0:
-            log.Info("Game Over!")
-            self.mostrar_game_over(
-                "GAME OVER", cst.RED if hasattr(cst, "RED") else (255, 0, 0)
-            )
-            self.running = False
-            return
-
         pygame.time.delay(1500)
 
     def _acabou(self) -> bool:
@@ -91,6 +79,14 @@ class Game:
             log.Info(f"vitória. pontuação final: {self.pacman.pontuacao}")
             self.mostrar_game_over(
                 "VITÓRIA!", cst.GREEN if hasattr(cst, "GREEN") else (0, 255, 0)
+            )
+            self.running = False
+            return True
+
+        if self.pacman.vidas <= 0:
+            log.Info("Game Over!")
+            self.mostrar_game_over(
+                "GAME OVER", cst.RED if hasattr(cst, "RED") else (255, 0, 0)
             )
             self.running = False
             return True
@@ -132,7 +128,11 @@ class Game:
             dy_input = 1
 
         [
-            f.mover(self.mapa, (int(self.pacman.x), int(self.pacman.y)))
+            f.mover(
+                self.mapa,
+                self.pacman.tempo_invencibilidade > 0,
+                (int(self.pacman.x), int(self.pacman.y)),
+            )
             for f in self.fantasmas
         ]
 
@@ -246,4 +246,3 @@ class Game:
         tela.blit(texto_i, rect_i)
 
         pygame.display.flip()
-

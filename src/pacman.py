@@ -30,25 +30,25 @@ class Pacman(Entidade):
             self.tempo_invencibilidade = 0
             log.Info("Invencibilidade terminou")
 
-    def mudar_direcao(self, dx: int, dy: int, mapa: Mapa): ## movimento continuo
+    def mudar_direcao(self, dx: int, dy: int, mapa: Mapa):  ## movimento continuo
         dx_futuro = self.x + dx
         dy_futuro = self.y + dy
-        
-        if mapa.eh_parede(dx_futuro, dy_futuro): ## se for parede, continua com 
-            self.dx_atual = self.dx_atual    
+
+        if mapa.eh_parede(dx_futuro, dy_futuro):  ## se for parede, continua com
+            self.dx_atual = self.dx_atual
             self.dy_atual = self.dy_atual
         elif dx != 0 or dy != 0:
             self.dx_atual = dx
             self.dy_atual = dy
 
-    def mover(self, mapa: Mapa): 
+    def mover(self, mapa: Mapa):
         novo_x = self.x + self.dx_atual
         novo_y = self.y + self.dy_atual
 
-        # debug
-        if mapa.eh_parede(novo_x, novo_y): log.Warn("Parede"); return    
+        if mapa.eh_parede(novo_x, novo_y):
+            log.Debug("Parede")
+            return
         log.Debug(f"DEBUG: Movendo Pacman de {self.y, self.x} para {novo_y, novo_x}")
-        # ---
 
         _ = self.pegar_item(mapa)
 
@@ -59,7 +59,7 @@ class Pacman(Entidade):
         if mapa.eh_ponto(self.x, self.y):
             if mapa.remover_ponto(self.x, self.y):
                 self.pontua(10)
-                log.Info(f"Pontuação: {self.pontuacao}")
+                log.Debug(f"Pontuação: {self.pontuacao}")
         elif mapa.eh_powerup(self.x, self.y):
             if mapa.remover_ponto(self.x, self.y):
                 self.fica_invencivel()
